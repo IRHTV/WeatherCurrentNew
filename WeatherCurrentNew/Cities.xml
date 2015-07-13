@@ -1,4 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Cities>
-  <Location name="Teheran Intl" id="40754000"  ConditionPath="C:\files\tmp\xml\11.mp4" />
+  <Location name="Asunción" id="86218000"/>
+  <Location name="Beirut" id="40100000"/>
+  <Location name="Berlin Mitte" id="10385000"/>
+  <Location name="Bogotá" id="80222000"/>
+  <Location name="Brasilia" id="83378000"/>
+  <Location name="Buenos Airesa" id="87582000"/>
+  <Location name="Caracas" id="80415000"/>
+  <Location name="Damaskus" id="40080000"/>
+  
+  <Location name="Cairo" id="62366000"/>
+  <Location name="Guatemala" id="78641000"/>
+  <Location name="Havanna" id="78224000"/>
+  <Location name="La Paz JFK Intl" id="85201000"/>
+  <Location name="Lima" id="84628000"/>
+  <Location name="Londres" id="03772000"/>
+  <Location name="Los Angeles" id="72295001"/>
+  <Location name="Madrid" id="08224000"/>
+  
+  <Location name="Managua" id="78741000"/>
+  <Location name="Ciudad de México" id="76679000"/>
+  <Location name="Miami" id="72197000"/>
+  <Location name="Montevideo" id="86580000"/>
+  <Location name="Moskau Sheremet" id="27613000"/>
+  <Location name="Panama" id="78806000"/>
+  <Location name="Puerto" id="78224000"/>
+  <Location name="Quito" id="84071000"/>
+  
+  <Location name="San Jose" id="78648000"/>
+  <Location name="San Juan Intl" id="78526000"/>
+  <Location name="San Salvador" id="78663000" />
+  <Location name="Santiago" id="85574000"/>
+  <Location name="Santo Domingo" id="78485000"/>
+  <Location name="Tegucigalpa" id="78720000"/>
+  <Location name="Teheran Intl" id="40754000"/>
+  <Location name="Washington DC" id="72405000"/>
+
 </Cities>

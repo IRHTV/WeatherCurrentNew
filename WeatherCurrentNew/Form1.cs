@@ -61,124 +61,9 @@ namespace WeatherCurrent
 
                 return false;
             }
-           
-        }
-        protected bool XmlDownloader()
-        {
-            try
-            {
 
-                // string FilePath = System.Configuration.ConfigurationSettings.AppSettings["FtpFile"].Trim();
-                FtpWebRequest request = (FtpWebRequest)FtpWebRequest.Create(_XmlFile);
-                request.Method = WebRequestMethods.Ftp.DownloadFile;
-                request.Credentials = new NetworkCredential(System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].Trim(),
-                    System.Configuration.ConfigurationSettings.AppSettings["FtpPassWord"].Trim());
-
-                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(responseStream);
-                FileStream file = File.Create(System.Configuration.ConfigurationSettings.AppSettings["XmlPath"].Trim());
-                if (!Directory.Exists(System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim()))
-                {
-                    Directory.CreateDirectory(System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim());
-                }
-                FileStream fileLog = File.Create(System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim() + _XmlFileName + ".xml");
-
-                byte[] buffer = new byte[32 * 1024];
-                int read;
-                FtpWebRequest request2 = (FtpWebRequest)FtpWebRequest.Create(new Uri(_XmlFile));
-                request2.Method = WebRequestMethods.Ftp.GetFileSize;
-                request2.Credentials = new NetworkCredential(System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].Trim(),
-                      System.Configuration.ConfigurationSettings.AppSettings["FtpPassWord"].Trim());
-                FtpWebResponse result2 = (FtpWebResponse)request2.GetResponse();
-                long length = result2.ContentLength;
-                progressBar1.Maximum = 100;
-                long bfr = 0;
-                while ((read = responseStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    bfr += read;
-                    int Pr = (int)Math.Ceiling(double.Parse(((bfr * 100) / length).ToString()));
-                    progressBar1.Value = Pr;
-                    file.Write(buffer, 0, read);
-                    fileLog.Write(buffer, 0, read);
-                    label1.Text = Pr.ToString() + "%";
-                    Application.DoEvents();
-                }
-
-                file.Close();
-                fileLog.Close();
-                responseStream.Close();
-                response.Close();
-                return true;
-            }
-            catch (Exception Exp)
-            {
-                richTextBox1.Text += "\n Error Download Xml File " + Exp.Message + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                return false;
-            }
-
-        }
-        protected void XmlDeleter()
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)FtpWebRequest.Create(_XmlFile);
-                request.Method = WebRequestMethods.Ftp.DeleteFile;
-                request.Credentials = new NetworkCredential(System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].Trim(),
-                    System.Configuration.ConfigurationSettings.AppSettings["FtpPassWord"].Trim());
-
-                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-
-                response.Close();
-            }
-            catch (Exception Exp)
-            {
-                richTextBox1.Text += "\n Error Delete Xml File " + Exp.Message + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-
-            }
-        }
-        public void XmlFinder()
-        {
-            try
-            {
-                var list = new List<string>();
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(System.Configuration.ConfigurationSettings.AppSettings["FtpServer"].Trim());
-                request.Credentials = new NetworkCredential(System.Configuration.ConfigurationSettings.AppSettings["FtpUserName"].Trim(),
-                       System.Configuration.ConfigurationSettings.AppSettings["FtpPassWord"].Trim());
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
-
-                using (var response = (FtpWebResponse)request.GetResponse())
-                {
-                    using (var stream = response.GetResponseStream())
-                    {
-                        using (var reader = new StreamReader(stream, true))
-                        {
-                            while (!reader.EndOfStream)
-                            {
-                                string FName = reader.ReadLine();
-                                if (FName.Contains(System.Configuration.ConfigurationSettings.AppSettings["FtpFile"].Trim()))
-                                {
-                                    _XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServer"].Trim() + FName;
-                                    _XmlFileName = FName;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception Exp)
-            {
-                richTextBox1.Text += "\n Error Find Xml" + Exp.Message + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-
-            }
-
-        }
+        }    
+     
         protected void FindFile()
         {
             try
@@ -194,13 +79,13 @@ namespace WeatherCurrent
                 if (FileLst.Count > 0)
                 {
 
-                   
+
 
                     //_XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServer"].Trim() + Path.GetFileName(FileLst[0]);
                     //_XmlFileName = Path.GetFileName(FileLst[0]);
 
 
-                    _XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServerLanAddress"].Trim()+ Path.GetFileName(FileLst[0]);
+                    _XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServerLanAddress"].Trim() + Path.GetFileName(FileLst[0]);
                     _XmlFileName = Path.GetFileName(FileLst[0]);
 
                     richTextBox1.Text += "\n _XmlFile: " + _XmlFile + " \n";
@@ -244,26 +129,19 @@ namespace WeatherCurrent
 
             if (_XmlFile.Length > 2)
             {
-                if (XmlDownloaderLan())
+                if (LoadData())
                 {
-
-                    if (LoadData())
-                    {
-                        StartRender();
-                    }
-                    else
-                    {
-                        richTextBox1.Text += "\n Error Loading Xml File  \n";
-                        richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                        richTextBox1.ScrollToCaret();
-                        Application.DoEvents();
-                        timer1.Interval = 10000;
-                    }
+                    StartRender();
                 }
                 else
                 {
+                    richTextBox1.Text += "\n Error Loading Xml File  \n";
+                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                    richTextBox1.ScrollToCaret();
+                    Application.DoEvents();
                     timer1.Interval = 10000;
                 }
+               
             }
             else
             {
@@ -283,22 +161,22 @@ namespace WeatherCurrent
         {
             try
             {
-                string XmlFilePath = ConfigurationSettings.AppSettings["XmlPath"].ToString().Trim();
+
                 //Check Xml File is exist or not:
-                if (File.Exists(XmlFilePath))
+                if (File.Exists(_XmlFile))
                 {
-                    richTextBox1.Text += "\n Xml : " + XmlFilePath + "\n";
+                    richTextBox1.Text += "\n Xml : " + _XmlFile + "\n";
                     richTextBox1.SelectionStart = richTextBox1.Text.Length;
                     richTextBox1.ScrollToCaret();
                     Application.DoEvents();
 
                     //Parse Xml file:
-                    return XmlParser(XmlFilePath);
+                    return XmlParser(_XmlFile);
 
                 }
                 else
                 {
-                    richTextBox1.Text += "\n Xml file not exist : " + XmlFilePath + "\n";
+                    richTextBox1.Text += "\n Xml file not exist : " + _XmlFile + "\n";
                     richTextBox1.SelectionStart = richTextBox1.Text.Length;
                     richTextBox1.ScrollToCaret();
                     Application.DoEvents();
@@ -317,6 +195,8 @@ namespace WeatherCurrent
         }
         protected bool XmlParser(string DataXmlPath)
         {
+
+            //TODO:
             try
             {
                 //Load Cities list:
@@ -327,7 +207,7 @@ namespace WeatherCurrent
                 {
                     //String Builder for Data Array:
                     StringBuilder Data = new StringBuilder();
-                    Data.Append("Celcius = [");
+                    //Data.Append("Celcius = [");
 
 
                     XCitiesDoc.Load(CitiesXmlPath);
@@ -336,6 +216,7 @@ namespace WeatherCurrent
                     //Load Data From Meteo Xml:
                     XmlDocument XDoc = new XmlDocument();
                     XDoc.Load(DataXmlPath);
+                    int cityIndex = 1;
                     foreach (XmlNode Nd in CitiesLst)
                     {
                         //Check Data is Exist in Data Xml File:
@@ -343,6 +224,8 @@ namespace WeatherCurrent
                         XmlElement City = (XmlElement)XDoc.SelectSingleNode(query);
                         if (City != null)
                         {
+                            Data.Append("City" + cityIndex + " = [");
+                            Data.Append("\"" + City.Attributes["name"].Value + "\",");
                             Data.Append("\"" + City.ChildNodes.Item(1).InnerText + "\",");
                             string[] Conds = City.ChildNodes.Item(3).InnerText.Split(',');
                             string StrCond = City.ChildNodes.Item(3).InnerText;
@@ -350,32 +233,8 @@ namespace WeatherCurrent
                             {
                                 StrCond = Conds[0].Trim();
                             }
-                            string CondSource = ConditionFinder(StrCond);
-                            if (File.Exists(CondSource))
-                            {
-                                string CondDest = Nd.Attributes["ConditionPath"].Value.ToString();
-                                try
-                                {
-                                    File.Copy(CondSource, CondDest, true);
-                                }
-                                catch (Exception Exp)
-                                {
-                                    richTextBox1.Text += "\n Error Copy Condition File : " + CondDest + "  TO:  " + CondDest + "\n";
-                                    richTextBox1.Text += Exp.Message + "\n";
-                                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                                    richTextBox1.ScrollToCaret();
-                                    return false;
-                                }
 
-                            }
-                            else
-                            {
-                                richTextBox1.Text += "\n File not found : " + CondSource + " ** " + City.ChildNodes.Item(3).InnerText + "\n";
-                                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                                richTextBox1.ScrollToCaret();
-                                Application.DoEvents();
-                                return false;
-                            }
+                            Data.Append(ConditionFinder(StrCond));
                         }
                         else
                         {
@@ -385,14 +244,15 @@ namespace WeatherCurrent
                             Application.DoEvents();
                             return false;
                         }
-
+                        Data.Append("]\r\n");
+                        cityIndex++;
                     }
                     if (Data.Length > 11)
                     {
                         Data = Data.Remove(Data.Length - 1, 1);
                     }
 
-                    Data.Append("];");
+
 
 
                     //Create Data Txt File:
@@ -428,37 +288,68 @@ namespace WeatherCurrent
         }
         protected string ConditionFinder(string CondStr)
         {
-            //Load Conditions list:
-            XmlDocument XConditionDoc = new XmlDocument();
-            string ConditionXmlPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\Conditions.xml";
-
-            if (File.Exists(ConditionXmlPath))
+            string retCondition = "";
+            switch (CondStr)
             {
-                XConditionDoc.Load(ConditionXmlPath);
-                string query = string.Format("//*[@name='{0}']", CondStr);
-                XmlElement Cond = (XmlElement)XConditionDoc.SelectSingleNode(query);
-                if (Cond != null)
-                {
-                    return Cond.Attributes["ConditionFilePath"].Value.ToString();
-                }
-                else
-                {
-                    query = string.Format("//*[@name='{0}']", "Sunny");
-                    Cond = (XmlElement)XConditionDoc.SelectSingleNode(query);
-
-                    richTextBox2.Text += "\n " + DateTime.Now.AddMinutes(_TimeOffsetMin).ToString() + "  \n";
-                    richTextBox2.Text += "\n No Condition : " + CondStr + "\n";
-                    richTextBox2.SelectionStart = richTextBox2.Text.Length;
-                    richTextBox2.ScrollToCaret();
-
-                    return Cond.Attributes["ConditionFilePath"].Value.ToString();
-                }
-
+                case "partly cloudy":
+                    retCondition = "'0','0','0','100','0','0','0'";
+                    break;
+                case "cloudy":
+                    retCondition = "'0','0','0','0','0','0','100'";
+                    break;
+                case "light showers":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "fog":
+                    retCondition = "'0','0','0','0','0','0','100'";
+                    break;
+                case "overcast":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "fair weather":
+                    retCondition = "'0','0','0','100','0','0','0'";
+                    break;
+                case "heavy rain":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "clear sky":
+                    retCondition = "'0','100','0','0','0','0','0'";
+                    break;
+                case "sunny":
+                    retCondition = "'0','100','0','0','0','0','0'";
+                    break;
+                case "light rain":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "rain":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "heavy showers":
+                    retCondition = "'0','0','100','0','0','0','0'";
+                    break;
+                case "thunderstorms possible":
+                    retCondition = "'0','0','0','0','0','0','100'";
+                    break;
+                case "snowfall":
+                    retCondition = "'0','0','0','0','100','0','0'";
+                    break;
+                case "some snow":
+                    retCondition = "'0','0','0','0','100','0','0'";
+                    break;
+                case "snow flakes":
+                    retCondition = "'0','0','0','0','100','0','0'";
+                    break;
+                case "light snowfall":
+                    retCondition = "'0','0','0','0','100','0','0'";
+                    break;
+                case "light sleet":
+                    retCondition = "'0','0','0','100','0','0','0'";
+                    break;
+                default:
+                    retCondition = "'0','100','0','0','0','0','0'";
+                    break;
             }
-            else
-            {
-                return null;
-            }
+            return retCondition;
         }
         protected void StartRender()
         {
