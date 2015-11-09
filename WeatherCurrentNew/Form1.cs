@@ -229,10 +229,10 @@ namespace WeatherCurrent
                             Data.Append("\"" + City.ChildNodes.Item(1).InnerText + "\",");
                             string[] Conds = City.ChildNodes.Item(3).InnerText.Split(',');
                             string StrCond = City.ChildNodes.Item(3).InnerText;
-                            if (Conds.Length > 0)
-                            {
-                                StrCond = Conds[0].Trim();
-                            }
+                            //if (Conds.Length > 0)
+                            //{
+                            //    StrCond = Conds[0].Trim();
+                            //}
 
                             Data.Append(ConditionFinder(StrCond));
                         }
@@ -288,67 +288,118 @@ namespace WeatherCurrent
         }
         protected string ConditionFinder(string CondStr)
         {
-            string retCondition = "";
-            switch (CondStr)
+            string retCondition = "'0','100','0','0','0','0','0'";
+
+            if(CondStr.ToLower().Contains("sun"))
             {
-                case "partly cloudy":
-                    retCondition = "'0','0','0','100','0','0','0'";
-                    break;
-                case "cloudy":
-                    retCondition = "'0','0','0','0','0','0','100'";
-                    break;
-                case "light showers":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "fog":
-                    retCondition = "'0','0','0','0','0','0','100'";
-                    break;
-                case "overcast":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "fair weather":
-                    retCondition = "'0','0','0','100','0','0','0'";
-                    break;
-                case "heavy rain":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "clear sky":
-                    retCondition = "'0','100','0','0','0','0','0'";
-                    break;
-                case "sunny":
-                    retCondition = "'0','100','0','0','0','0','0'";
-                    break;
-                case "light rain":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "rain":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "heavy showers":
-                    retCondition = "'0','0','100','0','0','0','0'";
-                    break;
-                case "thunderstorms possible":
-                    retCondition = "'0','0','0','0','0','0','100'";
-                    break;
-                case "snowfall":
-                    retCondition = "'0','0','0','0','100','0','0'";
-                    break;
-                case "some snow":
-                    retCondition = "'0','0','0','0','100','0','0'";
-                    break;
-                case "snow flakes":
-                    retCondition = "'0','0','0','0','100','0','0'";
-                    break;
-                case "light snowfall":
-                    retCondition = "'0','0','0','0','100','0','0'";
-                    break;
-                case "light sleet":
-                    retCondition = "'0','0','0','100','0','0','0'";
-                    break;
-                default:
-                    retCondition = "'0','100','0','0','0','0','0'";
-                    break;
+                return "'0','100','0','0','0','0','0'";
             }
+            if (CondStr.ToLower().Contains("cloud"))
+            {
+                return "'0','0','0','100','0','0','0'";
+            }
+            if (CondStr.ToLower().Contains("show"))
+            {
+                return "'0','0','100','0','0','0','0'";
+            }
+            if (CondStr.ToLower().Contains("fog"))
+            {
+                return "'0','0','0','0','0','0','100'";
+            }
+            if (CondStr.ToLower().Contains("rain"))
+            {
+                return "'0','0','100','0','0','0','0'";
+            }
+            if (CondStr.ToLower().Contains("clear"))
+            {
+                return "'0','100','0','0','0','0','0'";
+            }
+            if (CondStr.ToLower().Contains("thunder"))
+            {
+                return "'0','0','0','0','0','0','100'";
+            }
+            if (CondStr.ToLower().Contains("snow"))
+            {
+                return "'0','0','0','0','100','0','0'";
+            }
+            if (CondStr.ToLower().Contains("snow"))
+            {
+                return "'0','0','0','0','100','0','0'";
+            }
+            if (CondStr.ToLower().Contains("snow"))
+            {
+                return "'0','0','0','0','100','0','0'";
+            }
+            if (CondStr.ToLower().Contains("snow"))
+            {
+                return "'0','0','0','0','100','0','0'";
+            }
+            if (CondStr.ToLower().Contains("snow"))
+            {
+                return "'0','0','0','0','100','0','0'";
+            }
+
+
+            //switch (CondStr)
+            //{
+            //    case "partly cloudy":
+            //        retCondition = "'0','0','0','100','0','0','0'";
+            //        break;
+            //    case "cloudy":
+            //        retCondition = "'0','0','0','0','0','0','100'";
+            //        break;
+            //    case "light showers":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "fog":
+            //        retCondition = "'0','0','0','0','0','0','100'";
+            //        break;
+            //    case "overcast":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "fair weather":
+            //        retCondition = "'0','0','0','100','0','0','0'";
+            //        break;
+            //    case "heavy rain":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "clear sky":
+            //        retCondition = "'0','100','0','0','0','0','0'";
+            //        break;
+            //    case "sunny":
+            //        retCondition = "'0','100','0','0','0','0','0'";
+            //        break;
+            //    case "light rain":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "rain":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "heavy showers":
+            //        retCondition = "'0','0','100','0','0','0','0'";
+            //        break;
+            //    case "thunderstorms possible":
+            //        retCondition = "'0','0','0','0','0','0','100'";
+            //        break;
+            //    case "snowfall":
+            //        retCondition = "'0','0','0','0','100','0','0'";
+            //        break;
+            //    case "some snow":
+            //        retCondition = "'0','0','0','0','100','0','0'";
+            //        break;
+            //    case "snow flakes":
+            //        retCondition = "'0','0','0','0','100','0','0'";
+            //        break;
+            //    case "light snowfall":
+            //        retCondition = "'0','0','0','0','100','0','0'";
+            //        break;
+            //    case "light sleet":
+            //        retCondition = "'0','0','0','100','0','0','0'";
+            //        break;
+            //    default:
+            //        retCondition = "'0','100','0','0','0','0','0'";
+            //        break;
+            //}
             return retCondition;
         }
         protected void StartRender()
