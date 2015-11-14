@@ -288,7 +288,7 @@ namespace WeatherCurrent
         }
         protected string ConditionFinder(string CondStr)
         {
-            string retCondition = "'0','100','0','0','0','0','0'";
+            string retCondition = "'0','0','0','0','0','0','0'";
 
             if(CondStr.ToLower().Contains("sun"))
             {
@@ -322,84 +322,19 @@ namespace WeatherCurrent
             {
                 return "'0','0','0','0','100','0','0'";
             }
-            if (CondStr.ToLower().Contains("snow"))
+            if (CondStr.ToLower().Contains("fair"))
             {
-                return "'0','0','0','0','100','0','0'";
+                return "'0','100','0','0','0','0','0'";
             }
-            if (CondStr.ToLower().Contains("snow"))
+            if (CondStr.ToLower().Contains("overcast"))
             {
-                return "'0','0','0','0','100','0','0'";
+                return "'0','0','0','100','0','0','0'";
             }
-            if (CondStr.ToLower().Contains("snow"))
+            if (CondStr.ToLower().Contains("-"))
             {
-                return "'0','0','0','0','100','0','0'";
-            }
-            if (CondStr.ToLower().Contains("snow"))
-            {
-                return "'0','0','0','0','100','0','0'";
+                return "'0','100','0','0','0','0','0'";
             }
 
-
-            //switch (CondStr)
-            //{
-            //    case "partly cloudy":
-            //        retCondition = "'0','0','0','100','0','0','0'";
-            //        break;
-            //    case "cloudy":
-            //        retCondition = "'0','0','0','0','0','0','100'";
-            //        break;
-            //    case "light showers":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "fog":
-            //        retCondition = "'0','0','0','0','0','0','100'";
-            //        break;
-            //    case "overcast":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "fair weather":
-            //        retCondition = "'0','0','0','100','0','0','0'";
-            //        break;
-            //    case "heavy rain":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "clear sky":
-            //        retCondition = "'0','100','0','0','0','0','0'";
-            //        break;
-            //    case "sunny":
-            //        retCondition = "'0','100','0','0','0','0','0'";
-            //        break;
-            //    case "light rain":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "rain":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "heavy showers":
-            //        retCondition = "'0','0','100','0','0','0','0'";
-            //        break;
-            //    case "thunderstorms possible":
-            //        retCondition = "'0','0','0','0','0','0','100'";
-            //        break;
-            //    case "snowfall":
-            //        retCondition = "'0','0','0','0','100','0','0'";
-            //        break;
-            //    case "some snow":
-            //        retCondition = "'0','0','0','0','100','0','0'";
-            //        break;
-            //    case "snow flakes":
-            //        retCondition = "'0','0','0','0','100','0','0'";
-            //        break;
-            //    case "light snowfall":
-            //        retCondition = "'0','0','0','0','100','0','0'";
-            //        break;
-            //    case "light sleet":
-            //        retCondition = "'0','0','0','100','0','0','0'";
-            //        break;
-            //    default:
-            //        retCondition = "'0','100','0','0','0','0','0'";
-            //        break;
-            //}
             return retCondition;
         }
         protected void StartRender()
