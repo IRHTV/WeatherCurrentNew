@@ -17,275 +17,184 @@ namespace WeatherCurrent
 {
     public partial class Form1 : Form
     {
-        int _TimeOffsetMin = 0;
-        string DateTimeStr = "";
-        string _XmlFile = "";
-        string _XmlFileName = "";
         public Form1()
         {
             InitializeComponent();
         }
-        protected bool XmlDownloaderLan()
+        public Cities getData(Cities ct)
         {
+
             try
             {
-                string fileDest = System.Configuration.ConfigurationSettings.AppSettings["XmlPath"].Trim();
-                if (!Directory.Exists(System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim()))
+                Logger(ct.Name);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://artgroup.feeds.meteonews.net/forecasts/geonames/" + ct.Code.Replace("G", "") + ".xml?cumulation=3h&begin=" + DateTime.Now.AddHours(-8).ToString("yyyy-MM-dd HH:mm") + @"&end=" + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "&lang=en");
+                request.Credentials = new System.Net.NetworkCredential("artgroup", "Ar+HIspGr0p");
+                WebResponse response = request.GetResponse();
+                Stream stream = response.GetResponseStream();
+                StreamReader readerResult = new StreamReader(stream);
+
+                var result = readerResult.ReadToEnd();
+                stream.Dispose();
+                readerResult.Dispose();
+
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(result);
+
+
+                XmlNodeList elemListMin = xmlDoc.GetElementsByTagName("temp_min");
+                if (elemListMin.Count > 0)
                 {
-                    Directory.CreateDirectory(System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim());
+                    ct.Min = elemListMin[0].InnerText;
+                    Logger("Min1:" + ct.Min);
                 }
 
-                try
+                XmlNodeList elemListMax = xmlDoc.GetElementsByTagName("temp_max");
+                if (elemListMax.Count > 0)
                 {
-                    File.Delete(fileDest);
-                    richTextBox1.Text += " FILE DELETED:" + fileDest + " \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                }
-                catch
-                {
-
-                }
-                File.Copy(_XmlFile, fileDest);
-
-                richTextBox1.Text += _XmlFile + " COPY TO" + fileDest + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                return true;
-                //string fileLog = System.Configuration.ConfigurationSettings.AppSettings["XmlLogDirectory"].Trim() + _XmlFileName + ".xml";
-                //File.Copy(_XmlFile, fileLog);
-
-            }
-            catch
-            {
-
-                return false;
-            }
-
-        }    
-     
-        protected void FindFile()
-        {
-            try
-            {
-                List<string> FileLst = Directory.GetFiles(System.Configuration.ConfigurationSettings.AppSettings["FtpServerLanAddress"].Trim(),
-                    System.Configuration.ConfigurationSettings.AppSettings["FtpFile"].Trim() + "*.xml",
-                    SearchOption.TopDirectoryOnly).OrderByDescending(f => new FileInfo(f).CreationTime).Select(f => f.ToString()).ToList();
-
-                richTextBox1.Text += "\n FindFileCount: " + FileLst.Count + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-
-                if (FileLst.Count > 0)
-                {
-
-
-
-                    //_XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServer"].Trim() + Path.GetFileName(FileLst[0]);
-                    //_XmlFileName = Path.GetFileName(FileLst[0]);
-
-
-                    _XmlFile = System.Configuration.ConfigurationSettings.AppSettings["FtpServerLanAddress"].Trim() + Path.GetFileName(FileLst[0]);
-                    _XmlFileName = Path.GetFileName(FileLst[0]);
-
-                    richTextBox1.Text += "\n _XmlFile: " + _XmlFile + " \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-
-
-                    richTextBox1.Text += "\n _XmlFileName: " + _XmlFileName + " \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-
+                    ct.Max = elemListMax[0].InnerText;
+                    Logger("Max1:" + ct.Max);
                 }
 
+                XmlNodeList elemListavg = xmlDoc.GetElementsByTagName("temp_avg");
+                if (elemListavg.Count > 0)
+                {
+                    ct.Avg = elemListavg[elemListavg.Count - 1].InnerText;
+                    Logger("Avg: " + ct.Avg);
+                }
+                XmlNodeList elemListWind = xmlDoc.GetElementsByTagName("windforce");
+                if (elemListWind.Count > 0)
+                {
+                    ct.Wind = elemListWind[elemListWind.Count - 1].InnerText;
+                    Logger("Wind: " + ct.Wind);
+                }
+                XmlNodeList elemListHum = xmlDoc.GetElementsByTagName("hum");
+                if (elemListHum.Count > 0)
+                {
+                    ct.Hum = elemListHum[elemListHum.Count - 1].InnerText;
+                    Logger("Hum: " + ct.Hum);
+                }
+                XmlNodeList elemListState = xmlDoc.GetElementsByTagName("txt");
+                if (elemListState.Count > 0)
+                {
+                    ct.State = elemListState[elemListavg.Count - 1].InnerText;
+                    Logger("State:" + ct.State);
+                }
 
             }
             catch (Exception Exp)
             {
-                richTextBox1.Text += "\n Error Find XMl File " + Exp.Message + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-
+                ct.Max = "0";
+                ct.Max2 = "0";
+                ct.Min = "0";
+                ct.Min2 = "0";
+                ct.State = "0";
+                ct.State2 = "0";
+                ct.Avg = "0"; ;
+                richTextBox1.Text += Exp.Message + "  \n";
             }
 
+
+            return ct;
         }
+        protected void Logger(string log)
+        {
+            try
+            {
+                if (richTextBox1.Lines.Length > 400)
+                {
+                    richTextBox1.Text = "";
+                }
+                richTextBox1.Text += "[" + DateTime.Now.ToString() + "] " + (log) + " \n ======================= \n";
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret();
+                Application.DoEvents();
+            }
+            catch { }
+        }
+       
         private void button1_Click(object sender, EventArgs e)
         {
             timer1.Enabled = false;
-
-
-            // timer1.Interval = int.Parse(ConfigurationSettings.AppSettings["RenderIntervalMin"].ToString().Trim()) * 60 * 1000;
-            DateTimeStr = string.Format("{0:0000}", DateTime.Now.AddMinutes(_TimeOffsetMin).Year) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Month) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Day) + "_" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Hour) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Minute) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Second);
-
             button1.ForeColor = Color.White;
             button1.Text = "Started";
             button1.BackColor = Color.Red;
 
-            richTextBox1.Text = "";
+            List<Cities> Cts = new List<Cities>();
+            Cts.Add(new Cities { Name = "Asunción", Code = "G8873978" });
+            Cts.Add(new Cities { Name = "Beirut", Code = "G276781" });
+            Cts.Add(new Cities { Name = "Berlín", Code = "G2950159" });
+            Cts.Add(new Cities { Name = "Bogotá", Code = "G3688689" });
+            Cts.Add(new Cities { Name = "Brasilia", Code = "G3469058" });
+            Cts.Add(new Cities { Name = "BUENOS AIRES", Code = "G3435910" });
+            Cts.Add(new Cities { Name = "Caracas", Code = "G3660401" });
+            Cts.Add(new Cities { Name = "Damasco", Code = "G170654" });
+            Cts.Add(new Cities { Name = "EL Cairo", Code = "G8869792" });
+            Cts.Add(new Cities { Name = "Guatemala", Code = "G3557556" });
+            Cts.Add(new Cities { Name = "La Habana", Code = "G3553478" });
+            Cts.Add(new Cities { Name = "La Paz", Code = "G4000900" });
+            Cts.Add(new Cities { Name = "Lima", Code = "G3437846" });
+            Cts.Add(new Cities { Name = "Londres", Code = "G8893550" });
+            Cts.Add(new Cities { Name = "Los Ángeles", Code = "G5368361" });
+            Cts.Add(new Cities { Name = "Madrid", Code = "G3117735" });
+            Cts.Add(new Cities { Name = "Managua", Code = "G3617763" });
+            Cts.Add(new Cities { Name = "México D.F", Code = "G3530597" });
+            Cts.Add(new Cities { Name = "Miami", Code = "G4164138" });
+            Cts.Add(new Cities { Name = "Montevideo", Code = "G3441575" });
+            Cts.Add(new Cities { Name = "Moscú", Code = "G524901" });
+            Cts.Add(new Cities { Name = "Panamá (ciudad)", Code = "G3703443" });
+            Cts.Add(new Cities { Name = "Puerto Príncipe", Code = "G3718426" });
+            Cts.Add(new Cities { Name = "Quito", Code = "G3652462" });
+            Cts.Add(new Cities { Name = "San José", Code = "G3621841" });
+            Cts.Add(new Cities { Name = "San Juan", Code = "G4568127" });
+            Cts.Add(new Cities { Name = "San Salvador", Code = "G3583361" });
+            Cts.Add(new Cities { Name = "Santiago", Code = "G3871336" });
+            Cts.Add(new Cities { Name = "Santo Domingo", Code = "G3492908" });
+            Cts.Add(new Cities { Name = "Tegucigalpa", Code = "G3600949" });
+            Cts.Add(new Cities { Name = "Teherán", Code = "G112931" });
+            Cts.Add(new Cities { Name = "Washington", Code = "G4140963" });
 
-            _XmlFile = "";
-            FindFile();
+            List<Cities> CtsFinal = new List<Cities>();
+            foreach (var item in Cts)
+            {
+                CtsFinal.Add(getData(item));
+            }
 
-            if (_XmlFile.Length > 2)
+            StringBuilder Data = new StringBuilder();           
+            int cityIndex = 1;
+            foreach (Cities Nd in CtsFinal)
             {
-                if (LoadData())
-                {
-                    StartRender();
-                }
-                else
-                {
-                    richTextBox1.Text += "\n Error Loading Xml File  \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
-                    timer1.Interval = 10000;
-                }
-               
+                Data.Append("City" + cityIndex + " = [");
+                Data.Append("\"" + Nd.Name + "\",");
+                Data.Append("\"" + Nd.Min + "\",");
+                Data.Append(ConditionFinder(Nd.State));               
+                Data.Append("]\r\n");
+                cityIndex++;
             }
-            else
+            if (Data.Length > 11)
             {
-                richTextBox1.Text += "\n There is no Xml File contains: \n" + System.Configuration.ConfigurationSettings.AppSettings["FtpFile"].Trim();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                Application.DoEvents();
-                timer1.Interval = 10000;
+                Data = Data.Remove(Data.Length - 1, 1);
             }
+            string DataTxtFile = ConfigurationSettings.AppSettings["DataTxtPath"].ToString().Trim();
+            if (!File.Exists(DataTxtFile))
+            {
+                FileStream Fst = File.Create(DataTxtFile);
+                Fst.Close();
+            }
+            StreamWriter Sw = new StreamWriter(DataTxtFile, false, System.Text.Encoding.UTF8);
+            Sw.Write(Data.ToString());
+            Sw.Close();
+
+            Logger("Start Job");
+            render();
+            Convert();
 
             button1.ForeColor = Color.White;
             button1.Text = "Start";
             button1.BackColor = Color.Navy;
+            timer1.Interval = 1800000;
             timer1.Enabled = true;
         }
-        protected bool LoadData()
-        {
-            try
-            {
-
-                //Check Xml File is exist or not:
-                if (File.Exists(_XmlFile))
-                {
-                    richTextBox1.Text += "\n Xml : " + _XmlFile + "\n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
-
-                    //Parse Xml file:
-                    return XmlParser(_XmlFile);
-
-                }
-                else
-                {
-                    richTextBox1.Text += "\n Xml file not exist : " + _XmlFile + "\n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
-                    return false;
-                }
-            }
-            catch (Exception Exp)
-            {
-                richTextBox1.Text += "\nError : " + Exp.Message + "\n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                return false;
-            }
-
-
-        }
-        protected bool XmlParser(string DataXmlPath)
-        {
-
-            //TODO:
-            try
-            {
-                //Load Cities list:
-                XmlDocument XCitiesDoc = new XmlDocument();
-                string CitiesXmlPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\Cities.xml";
-
-                if (File.Exists(CitiesXmlPath))
-                {
-                    //String Builder for Data Array:
-                    StringBuilder Data = new StringBuilder();
-                    //Data.Append("Celcius = [");
-
-
-                    XCitiesDoc.Load(CitiesXmlPath);
-                    XmlNodeList CitiesLst = XCitiesDoc.GetElementsByTagName("Location");
-
-                    //Load Data From Meteo Xml:
-                    XmlDocument XDoc = new XmlDocument();
-                    XDoc.Load(DataXmlPath);
-                    int cityIndex = 1;
-                    foreach (XmlNode Nd in CitiesLst)
-                    {
-                        //Check Data is Exist in Data Xml File:
-                        string query = string.Format("//*[@id='{0}']", Nd.Attributes["id"].Value);
-                        XmlElement City = (XmlElement)XDoc.SelectSingleNode(query);
-                        if (City != null)
-                        {
-                            Data.Append("City" + cityIndex + " = [");
-                            Data.Append("\"" + City.Attributes["name"].Value + "\",");
-                            Data.Append("\"" + City.ChildNodes.Item(1).InnerText + "\",");
-                            string[] Conds = City.ChildNodes.Item(3).InnerText.Split(',');
-                            string StrCond = City.ChildNodes.Item(3).InnerText;
-                            //if (Conds.Length > 0)
-                            //{
-                            //    StrCond = Conds[0].Trim();
-                            //}
-
-                            Data.Append(ConditionFinder(StrCond));
-                        }
-                        else
-                        {
-                            richTextBox1.Text += "\n City not found : " + Nd.Attributes["name"].Value + " Id:" + Nd.Attributes["id"].Value + "\n";
-                            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                            richTextBox1.ScrollToCaret();
-                            Application.DoEvents();
-                            return false;
-                        }
-                        Data.Append("]\r\n");
-                        cityIndex++;
-                    }
-                    if (Data.Length > 11)
-                    {
-                        Data = Data.Remove(Data.Length - 1, 1);
-                    }
-
-
-
-
-                    //Create Data Txt File:
-                    string DataTxtFile = ConfigurationSettings.AppSettings["DataTxtPath"].ToString().Trim();
-                    if (!File.Exists(DataTxtFile))
-                    {
-                        FileStream Fst = File.Create(DataTxtFile);
-                        Fst.Close();
-                    }
-                    StreamWriter Sw = new StreamWriter(DataTxtFile, false, System.Text.Encoding.UTF8);
-                    Sw.Write(Data.ToString());
-                    Sw.Close();
-
-                    return true;
-                }
-                else
-                {
-                    richTextBox1.Text += "\n There is no file : " + CitiesXmlPath + "\n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
-                    return false;
-                }
-            }
-            catch (Exception Exp)
-            {
-                richTextBox1.Text += "\n Error Xml : " + Exp.Message + "\n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                return false;
-            }
-
-        }
+       
         protected string ConditionFinder(string CondStr)
         {
             string retCondition = "'0','0','0','0','0','0','0'";
@@ -337,98 +246,115 @@ namespace WeatherCurrent
 
             return retCondition;
         }
-        protected void StartRender()
+        public void Convert()
         {
+            string DateTimeStr = string.Format("{0:0000}", DateTime.Now.Year) + "-" + string.Format("{0:00}", DateTime.Now.Month) + "-" + string.Format("{0:00}", DateTime.Now.Day) + "_" + string.Format("{0:00}", DateTime.Now.Hour) + "-" + string.Format("{0:00}", DateTime.Now.Minute) + "-" + string.Format("{0:00}", DateTime.Now.Second);
+            DirectoryInfo Dir = new DirectoryInfo(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim());
+            Dir.Create();
+            string DestFile = ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4";
+            string SourceFile = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + ".mov";
+
+            Process proc = new Process();
+            proc.StartInfo.FileName = Path.GetDirectoryName(Application.ExecutablePath) + "\\ffmpeg";
+            proc.StartInfo.Arguments = "-y -i " + SourceFile + "   -vcodec h264 -acodec aac   \"" + DestFile + "\"";
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.EnableRaisingEvents = true;
+            proc.Start();
+            StreamReader reader = proc.StandardError;
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                Logger(line);
+            }
             try
             {
-                Process proc = new Process();
-                proc.StartInfo.FileName = "\"" + ConfigurationSettings.AppSettings["AeRenderPath"].ToString().Trim() + "\"";
-                DateTimeStr = string.Format("{0:0000}", DateTime.Now.AddMinutes(_TimeOffsetMin).Year) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Month) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Day) + "_" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Hour) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Minute) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Second);
+                string StaticDestFileName = ConfigurationSettings.AppSettings["ScheduleDestFileName"].ToString().Trim();
+                // File.Delete(StaticDestFileName);
+                File.Copy(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4", StaticDestFileName, true);
+                Logger("COPY FINAL:" + StaticDestFileName);
 
-
-                try
-                {
-                    string[] Dirsold = Directory.GetDirectories(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim());
-                    foreach (var item in Dirsold)
-                    {
-                        DirectoryInfo Dd = new DirectoryInfo(item);
-                        if (Dd.CreationTime.AddDays(3) < DateTime.Now.AddMinutes(_TimeOffsetMin))
-                            Dd.Delete(true);
-                    }
-
-                }
-                catch
-                {
-
-                }
-
-                DirectoryInfo Dir = new DirectoryInfo(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + string.Format("{0:0000}", DateTime.Now.AddMinutes(_TimeOffsetMin).Year) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Month) + "-" + string.Format("{0:00}", DateTime.Now.AddMinutes(_TimeOffsetMin).Day));
-
-                if (!Dir.Exists)
-                {
-                    Dir.Create();
-                }
-
-
-                proc.StartInfo.Arguments = " -project " + "\"" + ConfigurationSettings.AppSettings["AeProjectFile"].ToString().Trim() + "\"" + "   -comp   \"" + ConfigurationSettings.AppSettings["Composition"].ToString().Trim() + "\" -output " + "\"" + Dir + "\\" + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4" + "\"";
-                proc.StartInfo.RedirectStandardError = true;
-                proc.StartInfo.UseShellExecute = false;
-                proc.StartInfo.CreateNoWindow = true;
-                proc.EnableRaisingEvents = true;
-                proc.StartInfo.RedirectStandardOutput = true;
-                proc.StartInfo.RedirectStandardError = true;
-
-                if (!proc.Start())
-                {
-                    return;
-                }
-
-                proc.PriorityClass = ProcessPriorityClass.Normal;
-                StreamReader reader = proc.StandardOutput;
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (richTextBox1.Lines.Length > 10)
-                    {
-                        richTextBox1.Text = "";
-                    }
-                    richTextBox1.Text += (line) + " \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
-
-                }
-                proc.Close();
             }
-            catch (Exception Exp)
+            catch (Exception Ex)
             {
-                richTextBox1.Text += " \n" + Exp + " \n";
+                Logger(Ex.Message);
+            }
+        }
+        protected void render()
+        {
+            Logger("Start Render:");
+            Process proc = new Process();
+            proc.StartInfo.FileName = "\"" + ConfigurationSettings.AppSettings["AeRenderPath"].ToString().Trim() + "\"";
+
+            // string DateTimeStr = string.Format("{0:0000}", DateTime.Now.Year) + "-" + string.Format("{0:00}", DateTime.Now.Month) + "-" + string.Format("{0:00}", DateTime.Now.Day) + "_" + string.Format("{0:00}", DateTime.Now.Hour) + "-" + string.Format("{0:00}", DateTime.Now.Minute) + "-" + string.Format("{0:00}", DateTime.Now.Second);
+
+            DirectoryInfo Dir = new DirectoryInfo(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim());
+
+            if (!Dir.Exists)
+            {
+                Dir.Create();
+            }
+            try
+            {
+                File.Delete(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + ".mov");
+            }
+            catch { }
+
+            proc.StartInfo.Arguments = " -project " + "\"" + ConfigurationSettings.AppSettings["AeProjectFile"].ToString().Trim() + "\"" + "   -comp   \"" + ConfigurationSettings.AppSettings["Composition"].ToString().Trim() + "\" -output " + "\"" + Path.GetDirectoryName(Application.ExecutablePath) + "\\" + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + ".mov" + "\"";
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.EnableRaisingEvents = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.RedirectStandardError = true;
+
+            if (!proc.Start())
+            {
+                return;
+            }
+
+            proc.PriorityClass = ProcessPriorityClass.Normal;
+            StreamReader reader = proc.StandardOutput;
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (richTextBox1.Lines.Length > 3)
+                {
+                    richTextBox1.Text = "";
+                }
+                richTextBox1.Text += (line) + " \n";
                 richTextBox1.SelectionStart = richTextBox1.Text.Length;
                 richTextBox1.ScrollToCaret();
                 Application.DoEvents();
             }
+            proc.Close();
 
-
-
+            //try
+            //{
+            //    string StaticDestFileName = ConfigurationSettings.AppSettings["ScheduleDestFileName"].ToString().Trim();
+            //    // File.Delete(StaticDestFileName);
+            //    File.Copy(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4", StaticDestFileName, true);
+            //    richTextBox1.Text += "COPY FINAL:" + StaticDestFileName + " \n";
+            //    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            //    richTextBox1.ScrollToCaret();
+            //    Application.DoEvents();
+            //}
+            //catch (Exception Ex)
+            //{
+            //    richTextBox1.Text += Ex.Message + " \n";
+            //    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            //    richTextBox1.ScrollToCaret();
+            //    Application.DoEvents();
+            //}
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
-            string[] Timesvl = ConfigurationSettings.AppSettings["RenderIntervalMin"].ToString().Trim().Split('#');
-
-
-            foreach (string item in Timesvl)
-            {
-                if ((DateTime.Now.AddMinutes(_TimeOffsetMin) >= Convert.ToDateTime(item)) && (DateTime.Now.AddMinutes(_TimeOffsetMin) <= Convert.ToDateTime(item).AddMinutes(5)))
-                {
-                    timer1.Enabled = false;
-                    button1_Click(new object(), new EventArgs());
-                }
-            }
-
+            timer1.Enabled = false;
+            button1_Click(new object(), new EventArgs());
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            _TimeOffsetMin = int.Parse(ConfigurationSettings.AppSettings["TimeOffsetMin"].ToString().Trim());
             timer1.Interval = 3000;
             timer1.Enabled = true;
         }
