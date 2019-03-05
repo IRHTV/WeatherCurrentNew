@@ -191,7 +191,7 @@ namespace WeatherCurrent
             button1.ForeColor = Color.White;
             button1.Text = "Start";
             button1.BackColor = Color.Navy;
-            timer1.Interval = 1800000;
+            timer1.Interval = 120000;
             timer1.Enabled = true;
         }
        
