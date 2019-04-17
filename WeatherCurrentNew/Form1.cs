@@ -191,7 +191,7 @@ namespace WeatherCurrent
             button1.ForeColor = Color.White;
             button1.Text = "Start";
             button1.BackColor = Color.Navy;
-            timer1.Interval = 120000;
+            timer1.Interval = 10000;
             timer1.Enabled = true;
         }
        
@@ -350,12 +350,23 @@ namespace WeatherCurrent
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
-            timer1.Enabled = false;
-            button1_Click(new object(), new EventArgs());
+            string[] Times = ConfigurationSettings.AppSettings["RenderInterval"].ToString().Trim().Split('#');
+            for (int i = 0; i < Times.Length; i++)
+            {
+                richTextBox1.Text += (Times[i]+" ?? "+ DateTime.Now.ToString("HH:mm")) + " \n";
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret();
+                Application.DoEvents();
+                if (Times[i]==DateTime.Now.ToString("HH:mm"))
+                {
+                    timer1.Enabled = false;
+                    button1_Click(new object(), new EventArgs());
+                }
+            }           
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            timer1.Interval = 3000;
+            timer1.Interval = 2000;
             timer1.Enabled = true;
         }
     }
